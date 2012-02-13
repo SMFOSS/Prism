@@ -1,14 +1,15 @@
-from setuptools import setup, find_packages
-import sys, os
+from setuptools import find_packages
+from setuptools import setup
 
-version = '00'
+version = '0.0'
 
-setup(name='prismjack',
+requires = ['pyramid']
+
+setup(name='Prism',
       version=version,
       description="A simple plugin system for pyramid",
-      long_description="""\
-""",
-      classifiers=[], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
+      long_description=open('README.rst').read(),
+      classifiers=[], 
       keywords='',
       author='',
       author_email='',
@@ -17,9 +18,7 @@ setup(name='prismjack',
       packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
       include_package_data=True,
       zip_safe=False,
-      install_requires=[
-          # -*- Extra requirements: -*-
-      ],
+      install_requires=requires,
       entry_points="""
       # -*- Entry points: -*-
       """,
