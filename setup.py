@@ -1,13 +1,13 @@
 from setuptools import find_packages
 from setuptools import setup
 
-version = '0.0'
+version = '0.0a1'
 
 requires = ['pyramid']
 
 setup(name='Prism',
       version=version,
-      description="A simple plugin system for pyramid",
+      description="A simple framework atop pyramid",
       long_description=open('README.rst').read(),
       classifiers=[], 
       keywords='',
