@@ -74,10 +74,15 @@ class configurator(Base):
     def __enter__(self):
         self.parsed_plugins = list(self.specs_from_str(self.plugin_spec))
         self.loaded_plugins = list(self.load(self.parsed_plugins))
-        self.apply_hook('before_config', self.registry.settings) # maybe use events
+        self.apply_hook('modify_settings', self.registry.settings) # maybe use events
         if not self.app_factory is None:
             self.app_root = self.app_factory(self)
-            self.apply_hook('modify_resource_tree', self)
+            self.apply_hook('modify_resource_tree', self.app_root)
+            root_factory = getattr(self.app_root, 'root_factory', None)
+            if not root_factory is None:
+                self.set_root_factory(root_factory)
+            elif callable(self.app_root):
+                self.set_root_factory(self.app_root)
             self.set_root_factory(self.app_root.root_factory)
 
         if not self.request_factory is None:
@@ -87,7 +92,7 @@ class configurator(Base):
     def __exit__(self, exc_type, exc_val, exc_tb):
         # add error handling
         self.include_all_plugins()
-        self.apply_hook('after_config', self) # maybe use events
+        self.apply_hook('after_user_config') # maybe use events
 
     @classmethod
     def specs_from_str(cls, string):

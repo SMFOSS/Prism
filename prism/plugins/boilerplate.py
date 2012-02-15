@@ -5,7 +5,7 @@ from pyramid.session import UnencryptedCookieSessionFactoryConfig
 from prism.request import Request
 
 
-def before_config(config, settings, **kw):
+def modify_settings(config, settings):
     settings.setdefault('jinja2.i18n.domain', config.this)
 
 
