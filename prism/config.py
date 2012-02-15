@@ -23,6 +23,7 @@ class regattr(object):
         base = getattr(obj, self.attr)
         setattr(base, self.name, val)
 
+
 class configurator(Base):
     """
     A context manager for configuring a pyramid webapp w/ plugins
@@ -104,7 +105,9 @@ class configurator(Base):
 
     @property
     def wsgiapp(self):
-        return self.make_wsgi_app()
+        app = self.make_wsgi_app()
+        app.__app_name__ = self.this
+        return app
 
     def include_all_plugins(self):
         return len([self.include(plugin) for plugin in self.parsed_plugins])

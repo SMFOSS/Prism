@@ -3,7 +3,7 @@ from setuptools import setup
 
 version = '0.0a1'
 
-requires = ['pyramid']
+requires = ['pyramid', 'pyramid_jinja2']
 
 setup(name='Prism',
       version=version,
