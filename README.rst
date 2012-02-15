@@ -7,8 +7,9 @@
 A simple meta framework for webapps and services atop the `pyramid`
 framework.
 
-Features
-========
+
+Pieces Parts
+============
 
 Pluggable configurator
 ----------------------
@@ -59,4 +60,27 @@ The configurator scans the settings for the following keys::
   - modify_settings: configurator, settings
   - modify_resource_tree: configurator, app_root
   - after_user_config: configurator
+
+
+Configuration execution
+~~~~~~~~~~~~~~~~~~~~~~~
+
+0. Pyramid `Configurator` initialized
+1a. modify_settings hook foreach plugin
+1b. if prism.root_class: modify_resource_tree hook foreach plugin
+2. include foreach plugin
+3. code in with block
+4. after_user_config hook foreach plugin
+
+
+App and BaseResource
+--------------------
+
+Some generic base classes and interfaces for use with the prism
+configurator.  These are intended for applications that will build a
+traversal tree at initial time (and extend it depending on request
+behavior).  This useful if one wants to implement a polyglot
+persistence strategy or simple stateless apps where it does not make
+sense to hit a cache or persistence layer to render basic traversal
+structure.
 
