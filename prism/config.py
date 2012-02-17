@@ -50,6 +50,7 @@ class configurator(Base):
         super(configurator, self).__init__(**base_kwargs)
         if settings:
             settings = dict(settings)
+            self._settings = settings.copy()
             base_kwargs['settings'] = settings
 
             self.app_factory = self.rf_kw in settings \
@@ -68,6 +69,10 @@ class configurator(Base):
             self.exec_dir = global_config['here']        
 
     @property
+    def settings(self):
+        return self._settings
+
+    @property
     def this(self):
         return self.registry.appname
 
@@ -83,7 +88,6 @@ class configurator(Base):
                 self.set_root_factory(root_factory)
             elif callable(self.app_root):
                 self.set_root_factory(self.app_root)
-            self.set_root_factory(self.app_root.root_factory)
 
         if not self.request_factory is None:
             self.set_request_factory(self.request_factory(self))
@@ -123,8 +127,13 @@ class configurator(Base):
             if mod is not None:
                 if not mod is callable:
                     mod = self.open_resolve(mod)
-                mod(self, *args, **kw)
-                setattr(mod, "__%s__" %self.this, True)
+                try:
+                    mod(self, *args, **kw)
+                    setattr(mod, "__%s__" %self.this, True)
+                except Exception, e:
+                    #@@ sensible catching and repackaging of traceback
+                    logger.error("%s %s %s", hook_name, mod.__module__, e)
+                    raise
 
     @classmethod
     def load(cls, plugins):
