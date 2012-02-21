@@ -43,6 +43,7 @@ class configurator(Base):
     parsed_plugins = regattr('parsed_plugins')
     loaded_plugins = regattr('loaded_plugins')
     app_root = regattr('app_root')
+    _settings = regattr('_prism_settings')
 
     def __init__(self, settings=None, appname=None, global_config=None, **base_kwargs):
         package = base_kwargs.get('package') or caller_package()
@@ -80,7 +81,7 @@ class configurator(Base):
         self.parsed_plugins = list(self.specs_from_str(self.plugin_spec))
         self.loaded_plugins = list(self.load(self.parsed_plugins))
         self.apply_hook('modify_settings', self.registry.settings) # maybe use events
-        if not self.app_factory is None:
+        if not self.app_factory in (False, None):
             self.app_root = self.app_factory(self)
             self.apply_hook('modify_resource_tree', self.app_root)
             root_factory = getattr(self.app_root, 'root_factory', None)
@@ -89,7 +90,7 @@ class configurator(Base):
             elif callable(self.app_root):
                 self.set_root_factory(self.app_root)
 
-        if not self.request_factory is None:
+        if not self.request_factory in (False, None):
             self.set_request_factory(self.request_factory(self))
         return self
 

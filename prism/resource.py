@@ -1,29 +1,23 @@
+from .interfaces import IApp
+from .interfaces import IResource
+from contextlib import contextmanager as cm
 from pyramid.url import resource_url
-from zope.interface import Interface
-from zope.interface import implements
-import threading
+from zope.interface import implementer
 import os
+import threading
 
 
-class IResource(Interface):
-    """
-    """
-
-class IApp(Interface):
-    """
-    """
-
+@implementer(IResource)
 class BaseResource(dict):
     """
     Base class for resources
     """
-    implements(IResource)
     resource_url = staticmethod(resource_url)
     
     def __init__(self, parent=None, name=None, **kwargs):
+        super(BaseResource, self).__init__(**kwargs)
         self.__parent__ = parent
         self.__name__ = name
-        super(BaseResource, self).__init__(**kwargs)
 
     @property
     def approot(self):
@@ -60,16 +54,15 @@ class BaseResource(dict):
 
     @classmethod
     def add_resource_to_tree(cls, parent, name, *args, **kwargs):
-        resource = parent[name] = cls(name, parent, *args, **kwargs)
+        resource = parent[name] = cls(parent, name,  *args, **kwargs)
         return resource
 
 
-
+@implementer(IApp)
 class App(BaseResource):
     """
     Global traversal tree base
     """
-    implements(IApp)
     __name__ = ''
     __parent__ = None
     
@@ -94,6 +87,14 @@ class App(BaseResource):
         app = cls()
         cls.set_root(app)
         return app
+
+
+@cm
+def superinit(obj, *args, **kw):
+    try:
+        yield
+    finally:
+        super(obj.__class__, obj).__init__(*args, **kw)
 
 
 root_factory = App.root_factory
