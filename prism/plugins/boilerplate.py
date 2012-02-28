@@ -15,3 +15,4 @@ def includeme(config):
     config.set_session_factory(UnencryptedCookieSessionFactoryConfig(config.this))
     config.add_static_view('static', 'static')
     config.set_request_factory(Request)
+    
