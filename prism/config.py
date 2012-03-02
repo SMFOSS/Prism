@@ -48,7 +48,7 @@ class configurator(Base):
     def __init__(self, settings=None, appname=None, global_config=None, **base_kwargs):
         package = base_kwargs.get('package') or caller_package()
         base_kwargs['package'] = package
-        super(configurator, self).__init__(**base_kwargs)
+        super(configurator, self).__init__(settings=settings, **base_kwargs)
         if settings:
             settings = dict(settings)
             self._settings = settings.copy()
