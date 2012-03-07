@@ -1,3 +1,4 @@
+from .utils import regattr 
 from pyramid.config import Configurator as Base
 from pyramid.path import caller_package
 from pyramid.util import DottedNameResolver
@@ -7,21 +8,7 @@ import re
 
 logger = logging.getLogger(__name__)
 
-class regattr(object):
-    attr = 'registry'
-    def __init__(self, name, default=AttributeError):
-        self.name = name
-        self.default = default
 
-    def __get__(self, obj, objtype=None):
-        base = getattr(obj, self.attr)
-        if self.default is AttributeError:
-            return getattr(base, self.name)
-        return getattr(base, self.name, self.default)
-
-    def __set__(self, obj, val):
-        base = getattr(obj, self.attr)
-        setattr(base, self.name, val)
 
 
 class configurator(Base):
@@ -34,6 +21,7 @@ class configurator(Base):
     rf_kw = 'prism.root_class'
     req_kw = 'prism.request'
 
+    root_factory_set = regattr('_root_factory_set', False)
     app_factory = regattr('app_factory')
     request_factory = regattr('request_factory')
     plugin_spec = regattr('plugin_spec')
@@ -49,6 +37,8 @@ class configurator(Base):
         package = base_kwargs.get('package') or caller_package()
         base_kwargs['package'] = package
         super(configurator, self).__init__(settings=settings, **base_kwargs)
+        if 'root_factory' in base_kwargs:
+            self.root_factory_set = True
         if settings:
             settings = dict(settings)
             self._settings = settings.copy()
@@ -71,7 +61,7 @@ class configurator(Base):
 
     @property
     def settings(self):
-        return self._settings
+        return self.registry.settings
 
     @property
     def this(self):
@@ -84,11 +74,15 @@ class configurator(Base):
         if not self.app_factory in (False, None):
             self.app_root = self.app_factory(self)
             self.apply_hook('modify_resource_tree', self.app_root)
-            root_factory = getattr(self.app_root, 'root_factory', None)
-            if not root_factory is None:
-                self.set_root_factory(root_factory)
-            elif callable(self.app_root):
-                self.set_root_factory(self.app_root)
+            if  self.root_factory_set is False:
+                rf = getattr(self.app_root, 'root_factory', None)
+                if rf is None:
+                    if callable(self.app_root):
+                        rf = self.app_root 
+
+                if not rf is None:
+                    self.set_root_factory(rf)
+                    self.root_factory_set = True
 
         if not self.request_factory in (False, None):
             self.set_request_factory(self.request_factory(self))
@@ -98,6 +92,7 @@ class configurator(Base):
         # add error handling
         self.include_all_plugins()
         self.apply_hook('after_user_config') # maybe use events
+        self.commit()
 
     @classmethod
     def specs_from_str(cls, string):

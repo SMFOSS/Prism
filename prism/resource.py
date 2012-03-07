@@ -61,7 +61,7 @@ class BaseResource(dict):
 @implementer(IApp)
 class App(BaseResource):
     """
-    Global traversal tree base
+    Global in-memory traversal tree base
     """
     __name__ = ''
     __parent__ = None
@@ -69,9 +69,6 @@ class App(BaseResource):
     root = None 
     thread = threading.local()
     pid = os.getpid()
-
-    def __init__(self, **kwargs):
-        super(BaseResource, self).__init__(**kwargs)
 
     @classmethod
     def set_root(cls, root):
@@ -83,7 +80,7 @@ class App(BaseResource):
         return cls.root
 
     @classmethod
-    def factory(cls, config):
+    def factory(cls, config): #@@ do we really need config??
         app = cls()
         cls.set_root(app)
         return app
